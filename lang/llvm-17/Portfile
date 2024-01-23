@@ -114,6 +114,7 @@ configure.args-append   -DPython3_EXECUTABLE=${pythonfullpath}
 
 platform darwin {
     configure.cxx_stdlib libc++
+    configure.args-append -DLLDB_USE_SYSTEM_DEBUGSERVER=O
     depends_lib-append port:libcxx
     if {${os.major} < 11} {
         pre-fetch {
@@ -413,12 +414,14 @@ if {${subport} eq "lldb-${llvm_version}"} {
 
     set worksrcpath ${workpath}/${distname}/lldb
 
-    notes "Please follow the instructions at https://lldb.llvm.org/resources/build.html#code-signing-on-macos and then codesign lldb-server with:\n--------------------\n"
-    notes-append "${sub_prefix}/scripts/lldb/macos-setup-codesign.sh"
-    if {${os.major} >= 13} {
-        notes-append "sudo codesign --force --deep --preserve-metadata=identifier,entitlements,resource-rules,requirements,flags,team-identifier --sign lldb_codesign ${sub_prefix}/bin/lldb-server"
-    } else {
-        notes-append "sudo codesign --force --deep --preserve-metadata=identifier,entitlements,resource-rules,requirements --sign lldb_codesign ${sub_prefix}/bin/lldb-server"
+    if {${os.platform} ne "darwin"} {
+        notes "Please follow the instructions at https://lldb.llvm.org/resources/build.html#code-signing-on-macos and then codesign lldb-server with:\n--------------------\n"
+        notes-append "${sub_prefix}/scripts/lldb/macos-setup-codesign.sh"
+        if {${os.major} >= 13} {
+            notes-append "sudo codesign --force --deep --preserve-metadata=identifier,entitlements,resource-rules,requirements,flags,team-identifier --sign lldb_codesign ${sub_prefix}/bin/lldb-server"
+        } else {
+            notes-append "sudo codesign --force --deep --preserve-metadata=identifier,entitlements,resource-rules,requirements --sign lldb_codesign ${sub_prefix}/bin/lldb-server"
+        }
     }
 }
 
